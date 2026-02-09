@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>MERSEL.Services.HtmlToPdf.Application</RootNamespace>
+    <PackageId>Application</PackageId>
+    <Description>MERSEL HtmlToPdf mikroservisinin temel sözleşme katmanı. IHtmlToPdfConverter arayüzünü içerir. İstemci SDK'sı (MERSEL.Services.HtmlToPdf.Client) veya kendi implementasyonunuz için bu paketi referans alın.</Description>
+    <PackageTags>html;pdf;converter;interface;contract</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

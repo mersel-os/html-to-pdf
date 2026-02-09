@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+    <!-- NuGet Ortak Metadata -->
+    <Authors>Mersel</Authors>
+    <Company>Mersel Teknoloji A.Ş.</Company>
+    <Copyright>Copyright (c) 2025 Mersel Teknoloji A.Ş.</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/mersel-io/MERSEL.Services.HtmlToPdf</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mersel-io/MERSEL.Services.HtmlToPdf.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Varsayılan versiyon — CI/CD tag'den override eder -->
+    <VersionPrefix>1.0.0</VersionPrefix>
+  </PropertyGroup>
+</Project>

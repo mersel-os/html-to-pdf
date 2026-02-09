@@ -1,0 +1,109 @@
+# EditorConfig: https://editorconfig.org
+
+root = true
+
+# Tüm dosyalar için genel ayarlar
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Solution dosyaları
+[*.sln]
+indent_style = tab
+
+# XML / csproj / props dosyaları
+[*.{csproj,props,targets,config,nuspec}]
+indent_size = 2
+
+# JSON dosyaları
+[*.json]
+indent_size = 2
+
+# YAML dosyaları
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# Dockerfile
+[Dockerfile]
+indent_size = 4
+
+# ──────────────────────────────────────────────────────────────────
+# C# Kod Stili
+# ──────────────────────────────────────────────────────────────────
+
+[*.cs]
+
+# File-scoped namespace (C# 10+)
+csharp_style_namespace_declarations = file_scoped:warning
+
+# var tercihi: tip açık olduğunda var kullan
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Expression body
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
+csharp_style_expression_bodied_lambdas = true:suggestion
+
+# Pattern matching
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning
+csharp_style_pattern_matching_over_as_with_null_check = true:warning
+
+# Null checking
+csharp_style_throw_expression = true:suggestion
+csharp_style_conditional_delegate_call = true:suggestion
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_null_propagation = true:warning
+
+# Modifier sıralaması
+csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async:warning
+
+# using direktifleri
+dotnet_sort_system_directives_first = true
+
+# Yeni satır tercihleri
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Girintileme
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+
+# Boşluk
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+
+# ──────────────────────────────────────────────────────────────────
+# .NET Analiz Kuralları
+# ──────────────────────────────────────────────────────────────────
+
+# Nullable reference types
+dotnet_diagnostic.CS8600.severity = warning
+dotnet_diagnostic.CS8601.severity = warning
+dotnet_diagnostic.CS8602.severity = warning
+dotnet_diagnostic.CS8603.severity = warning
+dotnet_diagnostic.CS8604.severity = warning
+
+# Async metod isimlendirmesi
+dotnet_naming_rule.async_methods_should_end_with_async.symbols = async_methods
+dotnet_naming_rule.async_methods_should_end_with_async.style = async_suffix
+dotnet_naming_rule.async_methods_should_end_with_async.severity = suggestion
+dotnet_naming_symbols.async_methods.applicable_kinds = method
+dotnet_naming_symbols.async_methods.required_modifiers = async
+dotnet_naming_style.async_suffix.required_suffix = Async
+dotnet_naming_style.async_suffix.capitalization = pascal_case

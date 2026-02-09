@@ -1,0 +1,53 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+publish/
+
+## IDE
+.vs/
+.idea/
+.vscode/
+*.swp
+*~
+.cursor/
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+bld/
+artifacts/
+
+## NuGet
+**/[Pp]ackages/*
+*.nupkg
+.nuget/
+project.lock.json
+project.fragment.lock.json
+
+## Test results
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+## OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## Playwright browsers (dev ortamında indirilir)
+playwright-browsers/
+
+## Secrets (asla commit'leme)
+appsettings.*.local.json
+*.pfx
+*.key

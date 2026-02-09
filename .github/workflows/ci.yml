@@ -1,0 +1,97 @@
+# ══════════════════════════════════════════════════════════════════════
+# CI — Her push ve PR'da çalışır
+# Build, Test, Lint
+# ══════════════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: .NET SDK Kur
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: NuGet Önbellek
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Bağımlılıkları Geri Yükle
+        run: dotnet restore
+
+      - name: Derle (Release)
+        run: dotnet build --no-restore -c Release
+
+      - name: Playwright Chromium Kur
+        shell: pwsh
+        run: ./tests/Converter.Tests/bin/Release/net9.0/playwright.ps1 install chromium --with-deps
+
+      - name: Testleri Çalıştır
+        run: dotnet test --no-build -c Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Test Sonuçlarını Yükle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
+          retention-days: 7
+
+  # ── NuGet Paket Doğrulama ──────────────────────────────────────────
+  pack-verify:
+    name: NuGet Pack (Doğrulama)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: .NET SDK Kur
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Bağımlılıkları Geri Yükle
+        run: dotnet restore
+
+      - name: Derle (Release)
+        run: dotnet build --no-restore -c Release
+
+      - name: Application Paketini Oluştur (Doğrulama)
+        run: dotnet pack src/Application -c Release --no-build -o ./nupkgs
+
+      - name: Client Paketini Oluştur (Doğrulama)
+        run: dotnet pack src/Client -c Release --no-build -o ./nupkgs
+
+      - name: Paketleri Listele
+        run: ls -la ./nupkgs/
+
+      - name: NuGet Paketlerini Artifact Olarak Sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkgs-preview
+          path: ./nupkgs/*.nupkg
+          retention-days: 3
