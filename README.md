@@ -5,7 +5,7 @@
 [![.NET 9](https://img.shields.io/badge/.NET-9.0-purple)](https://dotnet.microsoft.com/download/dotnet/9.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![NuGet](https://img.shields.io/nuget/v/MERSEL.Services.HtmlToPdf.Client.svg)](https://www.nuget.org/packages/MERSEL.Services.HtmlToPdf.Client)
-[![CI](https://github.com/mersel-io/MERSEL.Services.HtmlToPdf/actions/workflows/ci.yml/badge.svg)](https://github.com/mersel-io/MERSEL.Services.HtmlToPdf/actions/workflows/ci.yml)
+[![CI](https://github.com/mersel-os/html-to-pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/mersel-os/html-to-pdf/actions/workflows/ci.yml)
 
 ## Neden Bu Servis?
 
@@ -578,4 +578,4 @@ Bu proje MIT Lisansı ile lisanslanmıştır — detaylar için [LICENSE](LICENS
 
 ---
 
-[Mersel](https://mersel.io) tarafından özenle geliştirilmiştir.
+[Mersel](https://mersel.io) tarafindan ozenle gelistirilmistir. | [GitHub](https://github.com/mersel-os/html-to-pdf)
