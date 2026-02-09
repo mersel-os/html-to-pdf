@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>MERSEL.Services.HtmlToPdf.Client</RootNamespace>
-    <PackageId>Client</PackageId>
+    <PackageId>MERSEL.Services.HtmlToPdf.Client</PackageId>
     <Description>MERSEL HtmlToPdf mikroservisini HTTP üzerinden çağıran istemci SDK'sı. Tek satır DI kaydıyla HTML → PDF dönüşümünü uygulamanıza entegre edin.</Description>
     <PackageTags>html;pdf;converter;microservice;client;sdk</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
