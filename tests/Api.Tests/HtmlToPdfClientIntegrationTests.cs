@@ -1,6 +1,6 @@
 using FluentAssertions;
 using MERSEL.Services.HtmlToPdf.Api.Tests.Fixtures;
-using MERSEL.Services.HtmlToPdf.Application.Interfaces;
+using MERSEL.Services.HtmlToPdf.Client.Interfaces;
 using MERSEL.Services.HtmlToPdf.Client;
 using MERSEL.Services.HtmlToPdf.Tests.Shared;
 using Microsoft.Extensions.Logging.Abstractions;
