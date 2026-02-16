@@ -88,14 +88,6 @@ jobs:
       - name: Derle (Release)
         run: dotnet build --no-restore -c Release -p:Version=${{ steps.version.outputs.VERSION }}
 
-      - name: Application Paketini Oluştur
-        run: |
-          dotnet pack src/Application \
-            -c Release \
-            --no-build \
-            -o ./nupkgs \
-            -p:PackageVersion=${{ steps.version.outputs.VERSION }}
-
       - name: Client Paketini Oluştur
         run: |
           dotnet pack src/Client \
@@ -198,7 +190,6 @@ jobs:
 
             | Paket | Versiyon |
             |-------|----------|
-            | [MERSEL.Services.HtmlToPdf.Application](https://www.nuget.org/packages/MERSEL.Services.HtmlToPdf.Application/${{ steps.version.outputs.VERSION }}) | ${{ steps.version.outputs.VERSION }} |
             | [MERSEL.Services.HtmlToPdf.Client](https://www.nuget.org/packages/MERSEL.Services.HtmlToPdf.Client/${{ steps.version.outputs.VERSION }}) | ${{ steps.version.outputs.VERSION }} |
 
             ## 🐳 Docker Image

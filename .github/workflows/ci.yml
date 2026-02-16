@@ -80,9 +80,6 @@ jobs:
       - name: Derle (Release)
         run: dotnet build --no-restore -c Release
 
-      - name: Application Paketini Oluştur (Doğrulama)
-        run: dotnet pack src/Application -c Release --no-build -o ./nupkgs
-
       - name: Client Paketini Oluştur (Doğrulama)
         run: dotnet pack src/Client -c Release --no-build -o ./nupkgs
 

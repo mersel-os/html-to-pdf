@@ -1,4 +1,4 @@
-using MERSEL.Services.HtmlToPdf.Application.Interfaces;
+using MERSEL.Services.HtmlToPdf.Client.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

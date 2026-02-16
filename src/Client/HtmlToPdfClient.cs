@@ -1,6 +1,6 @@
 using System.Globalization;
-using MERSEL.Services.HtmlToPdf.Application.Interfaces;
-using MERSEL.Services.HtmlToPdf.Application.Models;
+using MERSEL.Services.HtmlToPdf.Client.Interfaces;
+using MERSEL.Services.HtmlToPdf.Client.Models;
 using Microsoft.Extensions.Logging;
 
 namespace MERSEL.Services.HtmlToPdf.Client;
