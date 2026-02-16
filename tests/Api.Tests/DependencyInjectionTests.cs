@@ -1,10 +1,11 @@
 using FluentAssertions;
-using MERSEL.Services.HtmlToPdf.Application.Interfaces;
 using MERSEL.Services.HtmlToPdf.Client;
 using MERSEL.Services.HtmlToPdf.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using AppIHtmlToPdfConverter = MERSEL.Services.HtmlToPdf.Application.Interfaces.IHtmlToPdfConverter;
+using ClientIHtmlToPdfConverter = MERSEL.Services.HtmlToPdf.Client.Interfaces.IHtmlToPdfConverter;
 
 namespace MERSEL.Services.HtmlToPdf.Api.Tests;
 
@@ -30,13 +31,13 @@ public class DependencyInjectionTests
         services.AddHtmlToPdfInfrastructure();
         var provider = services.BuildServiceProvider();
 
-        // Assert — IHtmlToPdfConverter çözümlenebilmeli
-        var converter = provider.GetService<IHtmlToPdfConverter>();
+        // Assert — IHtmlToPdfConverter çözümlenebilmeli (Application interface — sunucu tarafı)
+        var converter = provider.GetService<AppIHtmlToPdfConverter>();
         converter.Should().NotBeNull();
         converter.Should().BeOfType<PlaywrightPdfConverter>();
 
         // Singleton doğrulaması: iki kez çözümle, aynı instance olmalı
-        var converter2 = provider.GetService<IHtmlToPdfConverter>();
+        var converter2 = provider.GetService<AppIHtmlToPdfConverter>();
         converter.Should().BeSameAs(converter2);
     }
 
@@ -62,8 +63,8 @@ public class DependencyInjectionTests
         services.AddHtmlToPdfClient(config);
         var provider = services.BuildServiceProvider();
 
-        // Assert — IHtmlToPdfConverter, HtmlToPdfClient olarak çözülmeli
-        var converter = provider.GetService<IHtmlToPdfConverter>();
+        // Assert — IHtmlToPdfConverter, HtmlToPdfClient olarak çözülmeli (Client interface)
+        var converter = provider.GetService<ClientIHtmlToPdfConverter>();
         converter.Should().NotBeNull();
         converter.Should().BeOfType<HtmlToPdfClient>();
     }
@@ -80,7 +81,7 @@ public class DependencyInjectionTests
         var provider = services.BuildServiceProvider();
 
         // Assert
-        var converter = provider.GetService<IHtmlToPdfConverter>();
+        var converter = provider.GetService<ClientIHtmlToPdfConverter>();
         converter.Should().NotBeNull();
         converter.Should().BeOfType<HtmlToPdfClient>();
     }
@@ -98,8 +99,8 @@ public class DependencyInjectionTests
         // Act — iki ayrı scope'ta çözümle
         using var scope1 = provider.CreateScope();
         using var scope2 = provider.CreateScope();
-        var instance1 = scope1.ServiceProvider.GetService<IHtmlToPdfConverter>();
-        var instance2 = scope2.ServiceProvider.GetService<IHtmlToPdfConverter>();
+        var instance1 = scope1.ServiceProvider.GetService<ClientIHtmlToPdfConverter>();
+        var instance2 = scope2.ServiceProvider.GetService<ClientIHtmlToPdfConverter>();
 
         // Assert — Transient kayıt: her seferinde farklı instance
         instance1.Should().NotBeSameAs(instance2);
@@ -120,8 +121,8 @@ public class DependencyInjectionTests
         services.AddHtmlToPdfClient(emptyConfig);
         var provider = services.BuildServiceProvider();
 
-        // Assert — hata vermeden çözümlenmeli
-        var converter = provider.GetService<IHtmlToPdfConverter>();
+        // Assert — hata vermeden çözümlenmeli (Client interface)
+        var converter = provider.GetService<ClientIHtmlToPdfConverter>();
         converter.Should().NotBeNull();
     }
 }
