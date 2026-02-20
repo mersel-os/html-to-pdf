@@ -147,7 +147,7 @@ public static class HtmlSamples
         <body>
             <div class="header">
                 <div>
-                    <div class="company">MERSEL Teknoloji A.Ş.</div>
+                    <div class="company">MERSEL YAZILIM A.Ş.</div>
                     <p>Levent Mah. Teknoloji Cad. No:42</p>
                     <p>34330 Beşiktaş / İstanbul</p>
                     <p>VKN: 1234567890</p>
@@ -176,7 +176,7 @@ public static class HtmlSamples
             </div>
             <div class="footer">
                 <p>Bu fatura elektronik ortamda oluşturulmuştur. GİB onaylıdır.</p>
-                <p>MERSEL Teknoloji A.Ş. — ETTN: a1b2c3d4-e5f6-7890-abcd-ef1234567890</p>
+                <p>MERSEL YAZILIM A.Ş. — ETTN: a1b2c3d4-e5f6-7890-abcd-ef1234567890</p>
             </div>
         </body>
         </html>

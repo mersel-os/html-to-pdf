@@ -6,8 +6,8 @@
 
     <!-- NuGet Ortak Metadata -->
     <Authors>Mersel</Authors>
-    <Company>Mersel Teknoloji A.Ş.</Company>
-    <Copyright>Copyright (c) 2025 Mersel Teknoloji A.Ş.</Copyright>
+    <Company>MERSEL YAZILIM A.Ş.</Company>
+    <Copyright>Copyright (c) 2025 MERSEL YAZILIM A.Ş.</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://mersel.io</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mersel-os/html-to-pdf.git</RepositoryUrl>
