@@ -1,6 +1,6 @@
 # ══════════════════════════════════════════════════════════════════════
 # Release — Tag push'ta çalışır (v*)
-# NuGet paketlerini yayınlar + Docker image push eder
+# NuGet paketlerini yayınlar + Docker image push eder + platform paketleri üretir
 # ══════════════════════════════════════════════════════════════════════
 #
 # Kullanım:
@@ -79,7 +79,7 @@ jobs:
         id: version
         run: |
           TAG=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$TAG" >> $GITHUB_OUTPUT
+          echo "VERSION=$TAG" >> "$GITHUB_OUTPUT"
           echo "📦 Versiyon: $TAG"
 
       - name: Bağımlılıkları Geri Yükle
@@ -155,11 +155,161 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
-  # ── 4. GitHub Release Oluştur ──────────────────────────────────────
+  # ── 4. Platform Paketleri ──────────────────────────────────────────
+  platform-publish:
+    name: Platform Paketi (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    needs: validate
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            archive: zip
+          - os: macos-15-intel
+            rid: osx-x64
+            archive: tar.gz
+          - os: macos-14
+            rid: osx-arm64
+            archive: tar.gz
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive: tar.gz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: .NET SDK Kur
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: NuGet Önbellek
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ matrix.rid }}-${{ hashFiles('**/Directory.Packages.props') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-${{ matrix.rid }}-
+            nuget-${{ runner.os }}-
+
+      - name: Tag'den Versiyon Çıkar
+        id: version
+        shell: bash
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$TAG" >> "$GITHUB_OUTPUT"
+          echo "ASSET_NAME=MERSEL.Services.HtmlToPdf.Web-$TAG-${{ matrix.rid }}" >> "$GITHUB_OUTPUT"
+
+      - name: Bağımlılıkları Geri Yükle
+        run: dotnet restore src/Web/Web.csproj -r ${{ matrix.rid }}
+
+      - name: Web Servisini Yayınla
+        run: >
+          dotnet publish src/Web/Web.csproj
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained true
+          --no-restore
+          -o ./publish/${{ matrix.rid }}
+          -p:Version=${{ steps.version.outputs.VERSION }}
+          -p:PublishSingleFile=false
+
+      - name: Playwright Chromium'u Paketle
+        shell: pwsh
+        run: |
+          $publishDir = Resolve-Path "./publish/${{ matrix.rid }}"
+          $env:PLAYWRIGHT_BROWSERS_PATH = Join-Path $publishDir "ms-playwright"
+
+          $script = Get-ChildItem -Path . -Filter "playwright.ps1" -Recurse |
+            Where-Object { $_.FullName -like "*src*Web*bin*" -or $_.FullName -like "*publish*" } |
+            Select-Object -First 1
+
+          if (-not $script) {
+            throw "playwright.ps1 bulunamadı."
+          }
+
+          & $script.FullName install chromium
+
+      - name: Paket Manifesti Yaz
+        shell: pwsh
+        run: |
+          $publishDir = Resolve-Path "./publish/${{ matrix.rid }}"
+          $manifest = [ordered]@{
+            name = "MERSEL.Services.HtmlToPdf.Web"
+            version = "${{ steps.version.outputs.VERSION }}"
+            rid = "${{ matrix.rid }}"
+            selfContained = $true
+            executable = if ("${{ runner.os }}" -eq "Windows") { "Web.exe" } else { "Web" }
+            environment = @{
+              ASPNETCORE_URLS = "http://127.0.0.1:8080"
+              PLAYWRIGHT_BROWSERS_PATH = "ms-playwright"
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $publishDir "html-to-pdf.manifest.json") -Encoding UTF8
+
+      - name: Başlatıcı Betik Yaz
+        shell: pwsh
+        run: |
+          $publishDir = Resolve-Path "./publish/${{ matrix.rid }}"
+
+          if ("${{ runner.os }}" -eq "Windows") {
+            $scriptPath = Join-Path $publishDir "run-html-to-pdf.cmd"
+            @(
+              '@echo off'
+              'set "SCRIPT_DIR=%~dp0"'
+              'if "%ASPNETCORE_URLS%"=="" set "ASPNETCORE_URLS=http://127.0.0.1:8080"'
+              'set "PLAYWRIGHT_BROWSERS_PATH=%SCRIPT_DIR%ms-playwright"'
+              '"%SCRIPT_DIR%Web.exe" %*'
+            ) | Set-Content -Path $scriptPath -Encoding ASCII
+          } else {
+            $scriptPath = Join-Path $publishDir "run-html-to-pdf"
+            @(
+              '#!/usr/bin/env bash'
+              'set -euo pipefail'
+              ''
+              'SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"'
+              'export ASPNETCORE_URLS="${ASPNETCORE_URLS:-http://127.0.0.1:8080}"'
+              'export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$SCRIPT_DIR/ms-playwright}"'
+              ''
+              'exec "$SCRIPT_DIR/Web" "$@"'
+            ) | Set-Content -Path $scriptPath -Encoding UTF8
+            chmod +x $scriptPath
+          }
+
+      - name: Arşiv Oluştur (Windows)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path ./dist | Out-Null
+          Compress-Archive `
+            -Path "./publish/${{ matrix.rid }}/*" `
+            -DestinationPath "./dist/${{ steps.version.outputs.ASSET_NAME }}.zip" `
+            -Force
+
+      - name: Arşiv Oluştur (macOS/Linux)
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          mkdir -p ./dist
+          tar -czf "./dist/${{ steps.version.outputs.ASSET_NAME }}.tar.gz" -C "./publish/${{ matrix.rid }}" .
+
+      - name: Platform Paketini Artifact Olarak Sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-${{ matrix.rid }}
+          path: ./dist/*
+          if-no-files-found: error
+          retention-days: 90
+
+  # ── 5. GitHub Release Oluştur ──────────────────────────────────────
   github-release:
     name: GitHub Release
     runs-on: ubuntu-latest
-    needs: [nuget-publish, docker-publish]
+    needs: [nuget-publish, docker-publish, platform-publish]
 
     steps:
       - name: Checkout
@@ -167,7 +317,7 @@ jobs:
 
       - name: Tag'den Versiyon Çıkar
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
       - name: NuGet Paketlerini İndir
         uses: actions/download-artifact@v4
@@ -175,12 +325,21 @@ jobs:
           name: nupkgs-${{ steps.version.outputs.VERSION }}
           path: ./nupkgs
 
+      - name: Platform Paketlerini İndir
+        uses: actions/download-artifact@v4
+        with:
+          pattern: platform-*
+          path: ./platform-packages
+          merge-multiple: true
+
       - name: GitHub Release Oluştur
         uses: softprops/action-gh-release@v2
         with:
           name: v${{ steps.version.outputs.VERSION }}
           generate_release_notes: true
-          files: ./nupkgs/*.nupkg
+          files: |
+            ./nupkgs/*.nupkg
+            ./platform-packages/*
           body: |
             ## 📦 NuGet Paketleri
 
@@ -197,3 +356,14 @@ jobs:
             ```bash
             docker pull ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
             ```
+
+            ## 🖥️ Platform Paketleri
+
+            Self-contained Web servis paketleri release asset'i olarak eklenir:
+
+            - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-win-x64.zip`
+            - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-osx-x64.tar.gz`
+            - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-osx-arm64.tar.gz`
+            - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz`
+
+            Paketlerde Playwright Chromium `ms-playwright/` altında gelir. Manuel çalıştırma için `run-html-to-pdf` veya `run-html-to-pdf.cmd` başlatıcısını kullanın.
