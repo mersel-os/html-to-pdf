@@ -228,7 +228,7 @@ jobs:
           $env:PLAYWRIGHT_BROWSERS_PATH = Join-Path $publishDir "ms-playwright"
 
           $script = Get-ChildItem -Path . -Filter "playwright.ps1" -Recurse |
-            Where-Object { $_.FullName -like "*src*Web*bin*" -or $_.FullName -like "*publish*" } |
+            Where-Object { $_.FullName -like "*src*Web*bin*Release*" } |
             Select-Object -First 1
 
           if (-not $script) {
