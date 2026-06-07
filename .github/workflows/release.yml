@@ -168,6 +168,9 @@ jobs:
           - os: windows-latest
             rid: win-x64
             archive: zip
+          - os: windows-latest
+            rid: win-x86
+            archive: zip
           - os: macos-15-intel
             rid: osx-x64
             archive: tar.gz
@@ -216,7 +219,7 @@ jobs:
           --no-restore
           -o ./publish/${{ matrix.rid }}
           -p:Version=${{ steps.version.outputs.VERSION }}
-          -p:PublishSingleFile=false
+          -p:PublishSingleFile=true
 
       - name: Playwright Chromium'u Paketle
         shell: pwsh
@@ -362,6 +365,7 @@ jobs:
             Self-contained Web servis paketleri release asset'i olarak eklenir:
 
             - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-win-x64.zip`
+            - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-win-x86.zip`
             - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-osx-x64.tar.gz`
             - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-osx-arm64.tar.gz`
             - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz`
