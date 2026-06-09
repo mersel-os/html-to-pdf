@@ -221,22 +221,6 @@ jobs:
           -p:Version=${{ steps.version.outputs.VERSION }}
           -p:PublishSingleFile=true
 
-      - name: Playwright Chromium'u Paketle
-        shell: pwsh
-        run: |
-          $publishDir = Resolve-Path "./publish/${{ matrix.rid }}"
-          $env:PLAYWRIGHT_BROWSERS_PATH = Join-Path $publishDir "ms-playwright"
-
-          $script = Get-ChildItem -Path . -Filter "playwright.ps1" -Recurse |
-            Where-Object { $_.FullName -like "*src*Web*bin*Release*" } |
-            Select-Object -First 1
-
-          if (-not $script) {
-            throw "playwright.ps1 bulunamadı."
-          }
-
-          & $script.FullName install chromium
-
       - name: Paket Manifesti Yaz
         shell: pwsh
         run: |
@@ -249,7 +233,7 @@ jobs:
             executable = if ("${{ runner.os }}" -eq "Windows") { "Web.exe" } else { "Web" }
             environment = @{
               ASPNETCORE_URLS = "http://127.0.0.1:8080"
-              PLAYWRIGHT_BROWSERS_PATH = "ms-playwright"
+              PLAYWRIGHT_AUTO_INSTALL = "true"
             }
           }
           $manifest | ConvertTo-Json -Depth 5 | Set-Content -Path (Join-Path $publishDir "html-to-pdf.manifest.json") -Encoding UTF8
@@ -265,7 +249,7 @@ jobs:
               '@echo off'
               'set "SCRIPT_DIR=%~dp0"'
               'if "%ASPNETCORE_URLS%"=="" set "ASPNETCORE_URLS=http://127.0.0.1:8080"'
-              'set "PLAYWRIGHT_BROWSERS_PATH=%SCRIPT_DIR%ms-playwright"'
+              'if "%PLAYWRIGHT_AUTO_INSTALL%"=="" set "PLAYWRIGHT_AUTO_INSTALL=true"'
               '"%SCRIPT_DIR%Web.exe" %*'
             ) | Set-Content -Path $scriptPath -Encoding ASCII
           } else {
@@ -276,7 +260,7 @@ jobs:
               ''
               'SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"'
               'export ASPNETCORE_URLS="${ASPNETCORE_URLS:-http://127.0.0.1:8080}"'
-              'export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$SCRIPT_DIR/ms-playwright}"'
+              'export PLAYWRIGHT_AUTO_INSTALL="${PLAYWRIGHT_AUTO_INSTALL:-true}"'
               ''
               'exec "$SCRIPT_DIR/Web" "$@"'
             ) | Set-Content -Path $scriptPath -Encoding UTF8
@@ -370,4 +354,14 @@ jobs:
             - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-osx-arm64.tar.gz`
             - `MERSEL.Services.HtmlToPdf.Web-${{ steps.version.outputs.VERSION }}-linux-x64.tar.gz`
 
-            Paketlerde Playwright Chromium `ms-playwright/` altında gelir. Manuel çalıştırma için `run-html-to-pdf` veya `run-html-to-pdf.cmd` başlatıcısını kullanın.
+            Paketlerde **Chromium dahil değildir**. İlk çalıştırmada `PLAYWRIGHT_AUTO_INSTALL=true` ile otomatik indirilir.
+
+            Manuel çalıştırma için `run-html-to-pdf` veya `run-html-to-pdf.cmd` başlatıcısını kullanın.
+
+            ### Ortam Değişkenleri
+
+            | Değişken | Varsayılan | Açıklama |
+            |----------|------------|----------|
+            | `ASPNETCORE_URLS` | `http://127.0.0.1:8080` | Dinlenecek adres |
+            | `PLAYWRIGHT_AUTO_INSTALL` | `true` | `true` = Chromium yoksa indir, `false` = indirmeyi atla |
+            | `PLAYWRIGHT_BROWSERS_PATH` | *(varsayılan önbellek)* | Chromium arama yolu (özel konum için) |

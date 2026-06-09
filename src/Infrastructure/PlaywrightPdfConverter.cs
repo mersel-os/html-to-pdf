@@ -37,16 +37,34 @@ public sealed class PlaywrightPdfConverter : IHtmlToPdfConverter, IAsyncDisposab
     /// </summary>
     public bool IsBrowserConnected => _browser is { IsConnected: true };
 
+    private const string AutoInstallEnvVar = "PLAYWRIGHT_AUTO_INSTALL";
+
     /// <summary>
     /// Chromium tarayıcısının yüklü olup olmadığını kontrol eder,
     /// yüklü değilse otomatik olarak indirir.
     /// Uygulama başlangıcında (Program.cs) çağrılması önerilir; fail-fast sağlar.
     /// Zaten yüklüyse hiçbir şey yapmaz (idempotent).
+    /// <para>
+    /// <c>PLAYWRIGHT_AUTO_INSTALL</c> ortam değişkeni ile kontrol edilir:
+    /// <list type="bullet">
+    ///   <item><c>true</c> (varsayılan): Chromium yoksa otomatik indirir</item>
+    ///   <item><c>false</c>: İndirmeyi atlar, tarayıcının önceden yüklenmiş olduğunu varsayar</item>
+    /// </list>
+    /// </para>
     /// </summary>
     public static void EnsureBrowserInstalled(ILogger? logger = null)
     {
         if (_browserInstalled)
             return;
+
+        var autoInstall = Environment.GetEnvironmentVariable(AutoInstallEnvVar) is not "false";
+
+        if (!autoInstall)
+        {
+            logger?.LogInformation("Playwright otomatik kurulum devre dışı (PLAYWRIGHT_AUTO_INSTALL=false)");
+            _browserInstalled = true;
+            return;
+        }
 
         logger?.LogInformation("Playwright Chromium tarayıcısı kontrol ediliyor...");
 

@@ -45,6 +45,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD curl -sf http://localhost:8080/health || exit 1
 
 ENV ASPNETCORE_URLS=http://+:8080
+ENV PLAYWRIGHT_AUTO_INSTALL=false
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "Web.dll"]
