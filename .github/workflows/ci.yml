@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -61,7 +61,7 @@ jobs:
   # ── NuGet Paket Doğrulama ──────────────────────────────────────────
   pack-verify:
     name: NuGet Pack (Doğrulama)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 

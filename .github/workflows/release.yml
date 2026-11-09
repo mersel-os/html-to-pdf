@@ -27,7 +27,7 @@ jobs:
   # ── 1. Build & Test ────────────────────────────────────────────────
   validate:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -62,7 +62,7 @@ jobs:
   # ── 2. NuGet Yayınlama ────────────────────────────────────────────
   nuget-publish:
     name: NuGet Yayınla
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: validate
     environment: nuget
 
@@ -116,7 +116,7 @@ jobs:
   # ── 3. Docker Image Yayınlama ──────────────────────────────────────
   docker-publish:
     name: Docker Image Yayınla
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: validate
 
     steps:
@@ -177,7 +177,7 @@ jobs:
           - os: macos-14
             rid: osx-arm64
             archive: tar.gz
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             rid: linux-x64
             archive: tar.gz
 
@@ -295,7 +295,7 @@ jobs:
   # ── 5. GitHub Release Oluştur ──────────────────────────────────────
   github-release:
     name: GitHub Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [nuget-publish, docker-publish, platform-publish]
 
     steps:
