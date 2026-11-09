@@ -37,9 +37,20 @@ RUN for i in 1 2 3; do \
 
 COPY --from=build /app/publish .
 
+# Playwright driver node binary'si NuGet paketinden 744 (root-only exec) olarak
+# geliyor; non-root kullaniciyla (UID 1654) calisabilmesi icin herkes icin
+# calistirilabilir yap
+RUN chmod -R a+rX /app/.playwright
+
+# Chromium'u paylasilan bir yola kur; runtime'ta /root/.cache/ms-playwright
+# non-root kullanici tarafindan erisilemez olacagi icin PLAYWRIGHT_BROWSERS_PATH
+# hem kurulumda hem runtime'ta bu yolu gosterir
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 # Chromium'u Playwright'ın kendi installer'ı ile ön-yükle
 # Microsoft.Playwright.dll doğrudan çalıştırılabilir (.NET runtime yeterli)
-RUN dotnet exec --runtimeconfig Web.runtimeconfig.json Microsoft.Playwright.dll install chromium
+RUN dotnet exec --runtimeconfig Web.runtimeconfig.json Microsoft.Playwright.dll install chromium \
+    && chmod -R a+rX /ms-playwright
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD curl -sf http://localhost:8080/health || exit 1
