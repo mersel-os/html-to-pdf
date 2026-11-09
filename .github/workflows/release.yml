@@ -174,7 +174,7 @@ jobs:
           - os: macos-15-intel
             rid: osx-x64
             archive: tar.gz
-          - os: macos-14
+          - os: macos-15
             rid: osx-arm64
             archive: tar.gz
           - os: ubuntu-24.04
